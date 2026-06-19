@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Lawyer Dashboard - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar lawyer-sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-briefcase sidebar-icon"></i>
+            <h5>Lawyer Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('lawyer_dashboard') }}" class="sidebar-link active">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('lawyer_view_cases') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>View Cases</span>
+            </a>
+            <a href="{{ url_for('lawyer_upload_files') }}" class="sidebar-link">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Encrypted Files</span>
+            </a>
+            <a href="{{ url_for('lawyer_download_files') }}" class="sidebar-link">
+                <i class="bi bi-cloud-download"></i>
+                <span>Download Files</span>
+            </a>
+            <a href="{{ url_for('lawyer_schedule_consultations') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Consultations</span>
+            </a>
+            <a href="{{ url_for('lawyer_court_info') }}" class="sidebar-link">
+                <i class="bi bi-info-circle"></i>
+                <span>Court Information</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-grid me-2"></i>Lawyer Dashboard</h1>
+            <p class="text-muted">Welcome back, {{ current_user.full_name or current_user.username }}</p>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="stat-card stat-primary">
+                    <div class="stat-icon">
+                        <i class="bi bi-folder-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ cases|length }}</h3>
+                        <p>Assigned Cases</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="stat-card stat-success">
+                    <div class="stat-icon">
+                        <i class="bi bi-file-earmark-lock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ files|length }}</h3>
+                        <p>Encrypted Files</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="stat-card stat-info">
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ hearings|length }}</h3>
+                        <p>Upcoming Hearings</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-folder me-2"></i>My Cases</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if cases %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Case #</th>
+                                            <th>Title</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for case in cases[:5] %}
+                                        <tr>
+                                            <td>{{ case.case_number }}</td>
+                                            <td>{{ case.case_title }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if case.status == 'active' else 'warning' }}">{{ case.status }}</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-folder-x"></i>
+                                <p>No cases assigned yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-file-earmark-lock me-2"></i>Recent Encrypted Files</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if files %}
+                            <div class="file-list">
+                                {% for file in files[:5] %}
+                                <div class="file-item">
+                                    <div class="file-icon">
+                                        <i class="bi bi-file-earmark-lock"></i>
+                                    </div>
+                                    <div class="file-info">
+                                        <h6>{{ file.original_filename }}</h6>
+                                        <small class="text-muted">{{ file.uploaded_at[:10] }}</small>
+                                    </div>
+                                    <span class="badge bg-success"><i class="bi bi-lock-fill"></i> Encrypted</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-file-earmark-x"></i>
+                                <p>No files yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <a href="{{ url_for('lawyer_upload_files') }}" class="quick-action-btn">
+                                    <i class="bi bi-cloud-upload"></i>
+                                    <span>Upload Encrypted File</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('lawyer_download_files') }}" class="quick-action-btn">
+                                    <i class="bi bi-cloud-download"></i>
+                                    <span>Download Files</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('lawyer_schedule_consultations') }}" class="quick-action-btn">
+                                    <i class="bi bi-calendar-plus"></i>
+                                    <span>Schedule Consultation</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('lawyer_court_info') }}" class="quick-action-btn">
+                                    <i class="bi bi-info-circle"></i>
+                                    <span>View Court Info</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

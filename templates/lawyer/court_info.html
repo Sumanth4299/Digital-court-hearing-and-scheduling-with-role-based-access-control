@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Court Information - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar lawyer-sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-briefcase sidebar-icon"></i>
+            <h5>Lawyer Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('lawyer_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('lawyer_view_cases') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>View Cases</span>
+            </a>
+            <a href="{{ url_for('lawyer_upload_files') }}" class="sidebar-link">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Encrypted Files</span>
+            </a>
+            <a href="{{ url_for('lawyer_download_files') }}" class="sidebar-link">
+                <i class="bi bi-cloud-download"></i>
+                <span>Download Files</span>
+            </a>
+            <a href="{{ url_for('lawyer_schedule_consultations') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Consultations</span>
+            </a>
+            <a href="{{ url_for('lawyer_court_info') }}" class="sidebar-link active">
+                <i class="bi bi-info-circle"></i>
+                <span>Court Information</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-info-circle me-2"></i>Court Information</h1>
+            <p class="text-muted">View court schedules and secure messages from the court</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-calendar-event me-2"></i>Court Hearings</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if hearings %}
+                            <div class="schedule-list">
+                                {% for hearing in hearings %}
+                                <div class="schedule-card hearing">
+                                    <div class="schedule-date">
+                                        <span class="day">{{ hearing.hearing_date[8:10] if hearing.hearing_date else '--' }}</span>
+                                        <span class="month">{{ hearing.hearing_date[5:7] if hearing.hearing_date else '--' }}</span>
+                                    </div>
+                                    <div class="schedule-info">
+                                        <h6>{{ hearing.case_title }}</h6>
+                                        <p class="text-muted mb-1">
+                                            <i class="bi bi-clock me-1"></i>{{ hearing.hearing_time }}
+                                            {% if hearing.courtroom %}
+                                            <span class="mx-2">|</span>
+                                            <i class="bi bi-door-open me-1"></i>{{ hearing.courtroom }}
+                                            {% endif %}
+                                        </p>
+                                        {% if hearing.judge_name %}
+                                        <small class="text-muted"><i class="bi bi-person me-1"></i>Judge: {{ hearing.judge_name }}</small>
+                                        {% endif %}
+                                        <span class="badge bg-primary ms-2">{{ hearing.hearing_type }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-calendar-x"></i>
+                                <p>No hearings scheduled</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-envelope-paper me-2"></i>Messages from Court</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                            <div class="message-list">
+                                {% for msg in messages %}
+                                <div class="message-card">
+                                    <div class="message-header">
+                                        <strong>{{ msg.subject }}</strong>
+                                        {% if msg.is_encrypted %}
+                                        <span class="badge bg-success"><i class="bi bi-lock-fill"></i> Encrypted</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="message-body">
+                                        {% if msg.is_encrypted and msg.decrypted_message %}
+                                        <p class="text-success"><i class="bi bi-unlock me-1"></i>{{ msg.decrypted_message[:100] }}{% if msg.decrypted_message|length > 100 %}...{% endif %}</p>
+                                        {% elif not msg.is_encrypted %}
+                                        <p>{{ msg.message[:100] }}{% if msg.message|length > 100 %}...{% endif %}</p>
+                                        {% else %}
+                                        <p class="text-muted"><i class="bi bi-lock me-1"></i>[Encrypted content]</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="message-meta">
+                                        <small class="text-muted">
+                                            From: {{ msg.sender_name }} | {{ msg.created_at[:10] }}
+                                        </small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p>No messages from court</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

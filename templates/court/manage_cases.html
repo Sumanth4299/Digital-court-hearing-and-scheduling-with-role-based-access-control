@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block title %}Manage Cases - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-hammer sidebar-icon"></i>
+            <h5>Court Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('court_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('court_schedule_hearings') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Hearings</span>
+            </a>
+            <a href="{{ url_for('court_manage_cases') }}" class="sidebar-link active">
+                <i class="bi bi-folder"></i>
+                <span>Manage Cases</span>
+            </a>
+            <a href="{{ url_for('court_view_users') }}" class="sidebar-link">
+                <i class="bi bi-people"></i>
+                <span>View Users</span>
+            </a>
+            <a href="{{ url_for('court_share_info') }}" class="sidebar-link">
+                <i class="bi bi-envelope-paper"></i>
+                <span>Share Secure Info</span>
+            </a>
+            <a href="{{ url_for('court_view_schedules') }}" class="sidebar-link">
+                <i class="bi bi-calendar3"></i>
+                <span>View Schedules</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-folder me-2"></i>Manage Cases</h1>
+            <p class="text-muted">Create and manage court cases</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-folder-plus me-2"></i>Create New Case</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('court_manage_cases') }}">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="case_number" class="form-label">Case Number</label>
+                                    <input type="text" class="form-control" id="case_number" name="case_number" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="case_type" class="form-label">Case Type</label>
+                                    <select class="form-select" id="case_type" name="case_type">
+                                        <option value="civil">Civil</option>
+                                        <option value="criminal">Criminal</option>
+                                        <option value="family">Family</option>
+                                        <option value="corporate">Corporate</option>
+                                        <option value="property">Property</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="case_title" class="form-label">Case Title</label>
+                                <input type="text" class="form-control" id="case_title" name="case_title" required>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="plaintiff" class="form-label">Plaintiff</label>
+                                    <input type="text" class="form-control" id="plaintiff" name="plaintiff">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="defendant" class="form-label">Defendant</label>
+                                    <input type="text" class="form-control" id="defendant" name="defendant">
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="lawyer_id" class="form-label">Assign Lawyer</label>
+                                    <select class="form-select" id="lawyer_id" name="lawyer_id">
+                                        <option value="">Select Lawyer...</option>
+                                        {% for lawyer in lawyers %}
+                                        <option value="{{ lawyer.id }}">{{ lawyer.full_name or lawyer.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="client_id" class="form-label">Assign Client</label>
+                                    <select class="form-select" id="client_id" name="client_id">
+                                        <option value="">Select Client...</option>
+                                        {% for client in clients %}
+                                        <option value="{{ client.id }}">{{ client.full_name or client.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="filing_date" class="form-label">Filing Date</label>
+                                    <input type="date" class="form-control" id="filing_date" name="filing_date">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" name="status">
+                                        <option value="pending">Pending</option>
+                                        <option value="active">Active</option>
+                                        <option value="closed">Closed</option>
+                                        <option value="dismissed">Dismissed</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-folder-plus me-2"></i>Create Case
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-folder me-2"></i>All Cases</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if cases %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Case #</th>
+                                            <th>Title</th>
+                                            <th>Type</th>
+                                            <th>Plaintiff</th>
+                                            <th>Defendant</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for case in cases %}
+                                        <tr>
+                                            <td><strong>{{ case.case_number }}</strong></td>
+                                            <td>{{ case.case_title }}</td>
+                                            <td>{{ case.case_type }}</td>
+                                            <td>{{ case.plaintiff or '-' }}</td>
+                                            <td>{{ case.defendant or '-' }}</td>
+                                            <td>
+                                                {% if case.status == 'active' %}
+                                                <span class="badge bg-success">{{ case.status }}</span>
+                                                {% elif case.status == 'pending' %}
+                                                <span class="badge bg-warning">{{ case.status }}</span>
+                                                {% elif case.status == 'closed' %}
+                                                <span class="badge bg-secondary">{{ case.status }}</span>
+                                                {% else %}
+                                                <span class="badge bg-info">{{ case.status }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-folder-x"></i>
+                                <p>No cases filed yet</p>
+                                <small class="text-muted">Use the form to create your first case</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}Download Files - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar client-sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-person sidebar-icon"></i>
+            <h5>Client Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('client_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('client_case_status') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>Case Status</span>
+            </a>
+            <a href="{{ url_for('client_upload_documents') }}" class="sidebar-link">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Documents</span>
+            </a>
+            <a href="{{ url_for('client_download_files') }}" class="sidebar-link active">
+                <i class="bi bi-cloud-download"></i>
+                <span>Download Files</span>
+            </a>
+            <a href="{{ url_for('client_schedule_appointments') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Appointments</span>
+            </a>
+            <a href="{{ url_for('client_hearing_dates') }}" class="sidebar-link">
+                <i class="bi bi-calendar-event"></i>
+                <span>Hearing Dates</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-cloud-download me-2"></i>Download Files</h1>
+            <p class="text-muted">Download encrypted files and decrypt them securely</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-file-earmark-lock me-2"></i>Available Files</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="encryption-info alert alert-success mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-shield-check me-2 fs-4"></i>
+                                <div>
+                                    <strong>Secure File Access</strong>
+                                    <p class="mb-0 small">You can download files in encrypted format or decrypt them for viewing. Files are protected with Affine Cipher encryption.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if files %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Filename</th>
+                                            <th>From</th>
+                                            <th>Size</th>
+                                            <th>Uploaded</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for file in files %}
+                                        <tr>
+                                            <td>
+                                                <i class="bi bi-file-earmark-lock text-success me-2"></i>
+                                                {{ file.original_filename }}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'primary' if file.uploader_role == 'lawyer' else 'info' }}">
+                                                    {{ file.uploader_name }} ({{ file.uploader_role | title }})
+                                                </span>
+                                            </td>
+                                            <td>{{ (file.file_size / 1024) | round(2) }} KB</td>
+                                            <td>{{ file.uploaded_at[:10] }}</td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-lock-fill"></i> Encrypted
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{{ url_for('download_encrypted', file_id=file.id) }}" class="btn btn-sm btn-outline-secondary" title="Download Encrypted">
+                                                        <i class="bi bi-lock"></i> Encrypted
+                                                    </a>
+                                                    <a href="{{ url_for('download_decrypted', file_id=file.id) }}" class="btn btn-sm btn-primary" title="Download Decrypted">
+                                                        <i class="bi bi-unlock"></i> Decrypted
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-file-earmark-x"></i>
+                                <p>No files available for download</p>
+                                <small class="text-muted">Files shared with you by your lawyer will appear here</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-info-circle me-2"></i>How File Encryption Works</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-icon">
+                                        <i class="bi bi-lock-fill"></i>
+                                    </div>
+                                    <h6>Encrypted Download</h6>
+                                    <p class="text-muted small">Downloads the file in its encrypted format. The file content is scrambled and unreadable without decryption.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-icon">
+                                        <i class="bi bi-unlock-fill"></i>
+                                    </div>
+                                    <h6>Decrypted Download</h6>
+                                    <p class="text-muted small">Automatically decrypts the file using the Affine Cipher algorithm and downloads the original content.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-icon">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
+                                    <h6>Affine Cipher</h6>
+                                    <p class="text-muted small">A secure encryption method using mathematical operations (ax + b mod m) to protect your sensitive documents.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

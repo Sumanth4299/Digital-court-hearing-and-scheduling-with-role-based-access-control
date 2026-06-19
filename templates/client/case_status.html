@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Case Status - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar client-sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-person sidebar-icon"></i>
+            <h5>Client Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('client_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('client_case_status') }}" class="sidebar-link active">
+                <i class="bi bi-folder"></i>
+                <span>Case Status</span>
+            </a>
+            <a href="{{ url_for('client_upload_documents') }}" class="sidebar-link">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Documents</span>
+            </a>
+            <a href="{{ url_for('client_download_files') }}" class="sidebar-link">
+                <i class="bi bi-cloud-download"></i>
+                <span>Download Files</span>
+            </a>
+            <a href="{{ url_for('client_schedule_appointments') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Appointments</span>
+            </a>
+            <a href="{{ url_for('client_hearing_dates') }}" class="sidebar-link">
+                <i class="bi bi-calendar-event"></i>
+                <span>Hearing Dates</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-folder me-2"></i>Case Status</h1>
+            <p class="text-muted">View your case details and status</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-folder-check me-2"></i>My Cases</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if cases %}
+                            <div class="row g-4">
+                                {% for case in cases %}
+                                <div class="col-md-6">
+                                    <div class="case-detail-card">
+                                        <div class="case-header">
+                                            <span class="case-number">{{ case.case_number }}</span>
+                                            <span class="badge bg-{{ 'success' if case.status == 'active' else 'warning' if case.status == 'pending' else 'secondary' }}">
+                                                {{ case.status | title }}
+                                            </span>
+                                        </div>
+                                        <h5 class="case-title">{{ case.case_title }}</h5>
+                                        <div class="case-details">
+                                            <div class="detail-row">
+                                                <span class="label"><i class="bi bi-tag me-1"></i>Type:</span>
+                                                <span class="value">{{ case.case_type | title }}</span>
+                                            </div>
+                                            {% if case.plaintiff %}
+                                            <div class="detail-row">
+                                                <span class="label"><i class="bi bi-person me-1"></i>Plaintiff:</span>
+                                                <span class="value">{{ case.plaintiff }}</span>
+                                            </div>
+                                            {% endif %}
+                                            {% if case.defendant %}
+                                            <div class="detail-row">
+                                                <span class="label"><i class="bi bi-person me-1"></i>Defendant:</span>
+                                                <span class="value">{{ case.defendant }}</span>
+                                            </div>
+                                            {% endif %}
+                                            {% if case.filing_date %}
+                                            <div class="detail-row">
+                                                <span class="label"><i class="bi bi-calendar me-1"></i>Filed:</span>
+                                                <span class="value">{{ case.filing_date }}</span>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% if case.description %}
+                                        <p class="case-description">{{ case.description }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-folder-x"></i>
+                                <p>No cases assigned to you</p>
+                                <small class="text-muted">Your cases will appear here once assigned by the court</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if hearings %}
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-calendar-event me-2"></i>Related Hearings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="schedule-list">
+                            {% for hearing in hearings %}
+                            <div class="schedule-card hearing">
+                                <div class="schedule-date">
+                                    <span class="day">{{ hearing.hearing_date[8:10] if hearing.hearing_date else '--' }}</span>
+                                    <span class="month">{{ hearing.hearing_date[5:7] if hearing.hearing_date else '--' }}</span>
+                                </div>
+                                <div class="schedule-info">
+                                    <h6>{{ hearing.case_title }}</h6>
+                                    <p class="text-muted mb-1">
+                                        <i class="bi bi-clock me-1"></i>{{ hearing.hearing_time }}
+                                        {% if hearing.courtroom %}
+                                        <span class="mx-2">|</span>
+                                        <i class="bi bi-door-open me-1"></i>{{ hearing.courtroom }}
+                                        {% endif %}
+                                    </p>
+                                    <span class="badge bg-primary">{{ hearing.hearing_type }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

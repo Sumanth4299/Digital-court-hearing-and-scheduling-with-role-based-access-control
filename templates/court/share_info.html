@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Share Secure Information - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-hammer sidebar-icon"></i>
+            <h5>Court Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('court_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('court_schedule_hearings') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Hearings</span>
+            </a>
+            <a href="{{ url_for('court_manage_cases') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>Manage Cases</span>
+            </a>
+            <a href="{{ url_for('court_view_users') }}" class="sidebar-link">
+                <i class="bi bi-people"></i>
+                <span>View Users</span>
+            </a>
+            <a href="{{ url_for('court_share_info') }}" class="sidebar-link active">
+                <i class="bi bi-envelope-paper"></i>
+                <span>Share Secure Info</span>
+            </a>
+            <a href="{{ url_for('court_view_schedules') }}" class="sidebar-link">
+                <i class="bi bi-calendar3"></i>
+                <span>View Schedules</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-envelope-paper me-2"></i>Share Secure Information</h1>
+            <p class="text-muted">Send encrypted messages to lawyers and clients</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-send me-2"></i>Send Secure Message</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('court_share_info') }}">
+                            <div class="mb-3">
+                                <label for="recipient_role" class="form-label">Send To</label>
+                                <select class="form-select" id="recipient_role" name="recipient_role" required>
+                                    <option value="">Select recipient type...</option>
+                                    <option value="lawyer">Lawyers</option>
+                                    <option value="client">Clients</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="recipient_id" class="form-label">Recipient</label>
+                                <select class="form-select" id="recipient_id" name="recipient_id" required>
+                                    <option value="">Select recipient...</option>
+                                    <optgroup label="Lawyers" id="lawyerOptions">
+                                        {% for lawyer in lawyers %}
+                                        <option value="{{ lawyer.id }}" data-role="lawyer">{{ lawyer.full_name or lawyer.username }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                    <optgroup label="Clients" id="clientOptions">
+                                        {% for client in clients %}
+                                        <option value="{{ client.id }}" data-role="client">{{ client.full_name or client.username }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="subject" class="form-label">Subject</label>
+                                <input type="text" class="form-control" id="subject" name="subject" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message</label>
+                                <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="encrypt" name="encrypt" checked>
+                                <label class="form-check-label" for="encrypt">
+                                    <i class="bi bi-lock-fill me-1"></i>Encrypt message with Affine Cipher
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-send me-2"></i>Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="content-card mb-4">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-box-arrow-up-right me-2"></i>Sent Messages</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if sent_messages %}
+                            <div class="message-list">
+                                {% for msg in sent_messages %}
+                                <div class="message-card">
+                                    <div class="message-header">
+                                        <strong>{{ msg.subject }}</strong>
+                                        {% if msg.is_encrypted %}
+                                        <span class="badge bg-success"><i class="bi bi-lock-fill"></i> Encrypted</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="message-meta">
+                                        <small class="text-muted">
+                                            To: {{ msg.recipient_role | title }} | {{ msg.created_at[:10] }}
+                                        </small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state-sm">
+                                <i class="bi bi-envelope"></i>
+                                <p>No sent messages</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-box-arrow-in-down-right me-2"></i>Received Messages</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if received_messages %}
+                            <div class="message-list">
+                                {% for msg in received_messages %}
+                                <div class="message-card">
+                                    <div class="message-header">
+                                        <strong>{{ msg.subject }}</strong>
+                                        {% if msg.is_encrypted %}
+                                        <span class="badge bg-success"><i class="bi bi-lock-fill"></i> Encrypted</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="message-meta">
+                                        <small class="text-muted">
+                                            From: {{ msg.sender_name }} ({{ msg.sender_role | title }}) | {{ msg.created_at[:10] }}
+                                        </small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state-sm">
+                                <i class="bi bi-inbox"></i>
+                                <p>No received messages</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Schedule Appointments - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar client-sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-person sidebar-icon"></i>
+            <h5>Client Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('client_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('client_case_status') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>Case Status</span>
+            </a>
+            <a href="{{ url_for('client_upload_documents') }}" class="sidebar-link">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Documents</span>
+            </a>
+            <a href="{{ url_for('client_download_files') }}" class="sidebar-link">
+                <i class="bi bi-cloud-download"></i>
+                <span>Download Files</span>
+            </a>
+            <a href="{{ url_for('client_schedule_appointments') }}" class="sidebar-link active">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Appointments</span>
+            </a>
+            <a href="{{ url_for('client_hearing_dates') }}" class="sidebar-link">
+                <i class="bi bi-calendar-event"></i>
+                <span>Hearing Dates</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-calendar-plus me-2"></i>Schedule Appointments</h1>
+            <p class="text-muted">Request appointments with your lawyer</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-plus-circle me-2"></i>Request Appointment</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('client_schedule_appointments') }}">
+                            <div class="mb-3">
+                                <label for="lawyer_id" class="form-label">Select Lawyer</label>
+                                <select class="form-select" id="lawyer_id" name="lawyer_id" required>
+                                    <option value="">Choose a lawyer...</option>
+                                    {% for lawyer in lawyers %}
+                                    <option value="{{ lawyer.id }}">{{ lawyer.full_name or lawyer.username }}{% if lawyer.specialization %} - {{ lawyer.specialization }}{% endif %}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="case_id" class="form-label">Related Case</label>
+                                <select class="form-select" id="case_id" name="case_id">
+                                    <option value="">Select case (optional)...</option>
+                                    {% for case in cases %}
+                                    <option value="{{ case.id }}">{{ case.case_number }} - {{ case.case_title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="preferred_date" class="form-label">Preferred Date</label>
+                                    <input type="date" class="form-control" id="preferred_date" name="preferred_date" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="preferred_time" class="form-label">Preferred Time</label>
+                                    <input type="time" class="form-control" id="preferred_time" name="preferred_time" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="appointment_type" class="form-label">Appointment Type</label>
+                                <select class="form-select" id="appointment_type" name="appointment_type">
+                                    <option value="consultation">General Consultation</option>
+                                    <option value="case_discussion">Case Discussion</option>
+                                    <option value="document_review">Document Review</option>
+                                    <option value="court_preparation">Court Preparation</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Notes / Reason</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Briefly describe the purpose of this appointment..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-calendar-plus me-2"></i>Request Appointment
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-calendar-check me-2"></i>My Appointments</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if appointments %}
+                            <div class="schedule-list">
+                                {% for apt in appointments %}
+                                <div class="schedule-card appointment">
+                                    <div class="schedule-date">
+                                        <span class="day">{{ apt.preferred_date[8:10] if apt.preferred_date else '--' }}</span>
+                                        <span class="month">{{ apt.preferred_date[5:7] if apt.preferred_date else '--' }}/{{ apt.preferred_date[:4] if apt.preferred_date else '--' }}</span>
+                                    </div>
+                                    <div class="schedule-info">
+                                        <h6>{{ apt.appointment_type | replace('_', ' ') | title }}</h6>
+                                        <p class="text-muted mb-1">
+                                            <i class="bi bi-clock me-1"></i>{{ apt.preferred_time }}
+                                        </p>
+                                        {% if apt.notes %}
+                                        <small class="text-muted d-block">{{ apt.notes[:50] }}{% if apt.notes|length > 50 %}...{% endif %}</small>
+                                        {% endif %}
+                                        <span class="badge bg-{{ 'success' if apt.status == 'scheduled' else 'warning' if apt.status == 'pending' else 'secondary' }} mt-2">
+                                            {{ apt.status | title }}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-calendar-x"></i>
+                                <p>No appointments scheduled</p>
+                                <small class="text-muted">Request your first appointment using the form</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

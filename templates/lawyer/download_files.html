@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Download Files - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar lawyer-sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-briefcase sidebar-icon"></i>
+            <h5>Lawyer Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('lawyer_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('lawyer_view_cases') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>View Cases</span>
+            </a>
+            <a href="{{ url_for('lawyer_upload_files') }}" class="sidebar-link">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Encrypted Files</span>
+            </a>
+            <a href="{{ url_for('lawyer_download_files') }}" class="sidebar-link active">
+                <i class="bi bi-cloud-download"></i>
+                <span>Download Files</span>
+            </a>
+            <a href="{{ url_for('lawyer_schedule_consultations') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Consultations</span>
+            </a>
+            <a href="{{ url_for('lawyer_court_info') }}" class="sidebar-link">
+                <i class="bi bi-info-circle"></i>
+                <span>Court Information</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-cloud-download me-2"></i>Download Files</h1>
+            <p class="text-muted">Download encrypted files from clients and your uploads</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-file-earmark-lock me-2"></i>Available Files</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="encryption-info alert alert-info mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle-fill me-2 fs-4"></i>
+                                <div>
+                                    <strong>Secure File Downloads</strong>
+                                    <p class="mb-0 small">As a lawyer, you can download encrypted files. Decryption is available for authorized files.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if files %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Filename</th>
+                                            <th>From</th>
+                                            <th>Size</th>
+                                            <th>Uploaded</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for file in files %}
+                                        <tr>
+                                            <td>
+                                                <i class="bi bi-file-earmark-lock text-success me-2"></i>
+                                                {{ file.original_filename }}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'info' if file.uploader_role == 'client' else 'primary' }}">
+                                                    {{ file.uploader_name }} ({{ file.uploader_role | title }})
+                                                </span>
+                                            </td>
+                                            <td>{{ (file.file_size / 1024) | round(2) }} KB</td>
+                                            <td>{{ file.uploaded_at[:10] }}</td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-lock-fill"></i> Encrypted
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{{ url_for('download_encrypted', file_id=file.id) }}" class="btn btn-sm btn-outline-primary" title="Download Encrypted">
+                                                        <i class="bi bi-download"></i> Encrypted
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-file-earmark-x"></i>
+                                <p>No files available</p>
+                                <small class="text-muted">Files shared with you will appear here</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

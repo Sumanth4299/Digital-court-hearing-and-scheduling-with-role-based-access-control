@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}View Users - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-hammer sidebar-icon"></i>
+            <h5>Court Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('court_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('court_schedule_hearings') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Hearings</span>
+            </a>
+            <a href="{{ url_for('court_manage_cases') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>Manage Cases</span>
+            </a>
+            <a href="{{ url_for('court_view_users') }}" class="sidebar-link active">
+                <i class="bi bi-people"></i>
+                <span>View Users</span>
+            </a>
+            <a href="{{ url_for('court_share_info') }}" class="sidebar-link">
+                <i class="bi bi-envelope-paper"></i>
+                <span>Share Secure Info</span>
+            </a>
+            <a href="{{ url_for('court_view_schedules') }}" class="sidebar-link">
+                <i class="bi bi-calendar3"></i>
+                <span>View Schedules</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-people me-2"></i>View Users</h1>
+            <p class="text-muted">View registered lawyers and clients</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-briefcase me-2"></i>Registered Lawyers ({{ lawyers|length }})</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if lawyers %}
+                            <div class="user-list">
+                                {% for lawyer in lawyers %}
+                                <div class="user-card">
+                                    <div class="user-avatar lawyer">
+                                        <i class="bi bi-briefcase"></i>
+                                    </div>
+                                    <div class="user-info">
+                                        <h6>{{ lawyer.full_name or lawyer.username }}</h6>
+                                        <p class="text-muted mb-1">
+                                            <i class="bi bi-envelope me-1"></i>{{ lawyer.email }}
+                                        </p>
+                                        {% if lawyer.bar_number %}
+                                        <small class="text-muted">
+                                            <i class="bi bi-card-text me-1"></i>Bar #: {{ lawyer.bar_number }}
+                                        </small>
+                                        {% endif %}
+                                        {% if lawyer.specialization %}
+                                        <span class="badge bg-info ms-2">{{ lawyer.specialization }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-briefcase-fill"></i>
+                                <p>No lawyers registered yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-people me-2"></i>Registered Clients ({{ clients|length }})</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if clients %}
+                            <div class="user-list">
+                                {% for client in clients %}
+                                <div class="user-card">
+                                    <div class="user-avatar client">
+                                        <i class="bi bi-person"></i>
+                                    </div>
+                                    <div class="user-info">
+                                        <h6>{{ client.full_name or client.username }}</h6>
+                                        <p class="text-muted mb-1">
+                                            <i class="bi bi-envelope me-1"></i>{{ client.email }}
+                                        </p>
+                                        {% if client.phone %}
+                                        <small class="text-muted">
+                                            <i class="bi bi-telephone me-1"></i>{{ client.phone }}
+                                        </small>
+                                        {% endif %}
+                                        {% if client.case_number %}
+                                        <span class="badge bg-secondary ms-2">Case: {{ client.case_number }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-people-fill"></i>
+                                <p>No clients registered yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

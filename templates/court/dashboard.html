@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Court Dashboard - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-hammer sidebar-icon"></i>
+            <h5>Court Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('court_dashboard') }}" class="sidebar-link active">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('court_schedule_hearings') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Hearings</span>
+            </a>
+            <a href="{{ url_for('court_manage_cases') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>Manage Cases</span>
+            </a>
+            <a href="{{ url_for('court_view_users') }}" class="sidebar-link">
+                <i class="bi bi-people"></i>
+                <span>View Users</span>
+            </a>
+            <a href="{{ url_for('court_share_info') }}" class="sidebar-link">
+                <i class="bi bi-envelope-paper"></i>
+                <span>Share Secure Info</span>
+            </a>
+            <a href="{{ url_for('court_view_schedules') }}" class="sidebar-link">
+                <i class="bi bi-calendar3"></i>
+                <span>View Schedules</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-grid me-2"></i>Court Dashboard</h1>
+            <p class="text-muted">Overview of court operations and statistics</p>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card stat-primary">
+                    <div class="stat-icon">
+                        <i class="bi bi-folder-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ cases|length }}</h3>
+                        <p>Total Cases</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card stat-success">
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ hearings|length }}</h3>
+                        <p>Scheduled Hearings</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card stat-info">
+                    <div class="stat-icon">
+                        <i class="bi bi-briefcase-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ lawyers|length }}</h3>
+                        <p>Registered Lawyers</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card stat-warning">
+                    <div class="stat-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ clients|length }}</h3>
+                        <p>Registered Clients</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-calendar-event me-2"></i>Recent Hearings</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if hearings %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Case</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for hearing in hearings[:5] %}
+                                        <tr>
+                                            <td>{{ hearing.case_title }}</td>
+                                            <td>{{ hearing.hearing_date }}</td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ hearing.status }}</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-calendar-x"></i>
+                                <p>No hearings scheduled yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-folder me-2"></i>Recent Cases</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if cases %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Case #</th>
+                                            <th>Title</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for case in cases[:5] %}
+                                        <tr>
+                                            <td>{{ case.case_number }}</td>
+                                            <td>{{ case.case_title }}</td>
+                                            <td>
+                                                <span class="badge bg-info">{{ case.status }}</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-folder-x"></i>
+                                <p>No cases filed yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <a href="{{ url_for('court_schedule_hearings') }}" class="quick-action-btn">
+                                    <i class="bi bi-calendar-plus"></i>
+                                    <span>Schedule Hearing</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('court_manage_cases') }}" class="quick-action-btn">
+                                    <i class="bi bi-folder-plus"></i>
+                                    <span>Create Case</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('court_share_info') }}" class="quick-action-btn">
+                                    <i class="bi bi-envelope-paper"></i>
+                                    <span>Send Secure Message</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('court_view_users') }}" class="quick-action-btn">
+                                    <i class="bi bi-people"></i>
+                                    <span>View All Users</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Upload Encrypted Files - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar lawyer-sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-briefcase sidebar-icon"></i>
+            <h5>Lawyer Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('lawyer_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('lawyer_view_cases') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>View Cases</span>
+            </a>
+            <a href="{{ url_for('lawyer_upload_files') }}" class="sidebar-link active">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Encrypted Files</span>
+            </a>
+            <a href="{{ url_for('lawyer_download_files') }}" class="sidebar-link">
+                <i class="bi bi-cloud-download"></i>
+                <span>Download Files</span>
+            </a>
+            <a href="{{ url_for('lawyer_schedule_consultations') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Consultations</span>
+            </a>
+            <a href="{{ url_for('lawyer_court_info') }}" class="sidebar-link">
+                <i class="bi bi-info-circle"></i>
+                <span>Court Information</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-cloud-upload me-2"></i>Upload Encrypted Files</h1>
+            <p class="text-muted">Upload files securely with Affine encryption for your clients</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-upload me-2"></i>Upload New File</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="encryption-info alert alert-info mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-shield-lock-fill me-2 fs-4"></i>
+                                <div>
+                                    <strong>Affine Encryption Active</strong>
+                                    <p class="mb-0 small">Files are automatically encrypted using Affine Cipher (a=5, b=8)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form method="POST" action="{{ url_for('lawyer_upload_files') }}" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Select File</label>
+                                <div class="upload-zone">
+                                    <input type="file" class="form-control" id="file" name="file" required>
+                                    <small class="text-muted mt-2 d-block">Allowed: txt, pdf, doc, docx, png, jpg, jpeg (Max: 16MB)</small>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="recipient_id" class="form-label">Send To Client</label>
+                                <select class="form-select" id="recipient_id" name="recipient_id">
+                                    <option value="">Select client...</option>
+                                    {% for client in clients %}
+                                    <option value="{{ client.id }}">{{ client.full_name or client.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="case_id" class="form-label">Related Case</label>
+                                <select class="form-select" id="case_id" name="case_id">
+                                    <option value="">Select case...</option>
+                                    {% for case in cases %}
+                                    <option value="{{ case.id }}">{{ case.case_number }} - {{ case.case_title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Brief description of the file..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-lock-fill me-2"></i>Upload & Encrypt File
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-file-earmark-lock me-2"></i>My Uploaded Files</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if uploads %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Filename</th>
+                                            <th>Size</th>
+                                            <th>Uploaded</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for file in uploads %}
+                                        <tr>
+                                            <td>
+                                                <i class="bi bi-file-earmark-lock text-success me-2"></i>
+                                                {{ file.original_filename }}
+                                            </td>
+                                            <td>{{ (file.file_size / 1024) | round(2) }} KB</td>
+                                            <td>{{ file.uploaded_at[:10] }}</td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-lock-fill"></i> Encrypted
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('download_encrypted', file_id=file.id) }}" class="btn btn-sm btn-outline-primary" title="Download Encrypted">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-file-earmark-x"></i>
+                                <p>No files uploaded yet</p>
+                                <small class="text-muted">Upload your first encrypted file using the form</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

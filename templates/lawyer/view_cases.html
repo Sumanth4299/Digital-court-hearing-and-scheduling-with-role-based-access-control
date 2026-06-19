@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}View Cases - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar lawyer-sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-briefcase sidebar-icon"></i>
+            <h5>Lawyer Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('lawyer_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('lawyer_view_cases') }}" class="sidebar-link active">
+                <i class="bi bi-folder"></i>
+                <span>View Cases</span>
+            </a>
+            <a href="{{ url_for('lawyer_upload_files') }}" class="sidebar-link">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Encrypted Files</span>
+            </a>
+            <a href="{{ url_for('lawyer_download_files') }}" class="sidebar-link">
+                <i class="bi bi-cloud-download"></i>
+                <span>Download Files</span>
+            </a>
+            <a href="{{ url_for('lawyer_schedule_consultations') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Consultations</span>
+            </a>
+            <a href="{{ url_for('lawyer_court_info') }}" class="sidebar-link">
+                <i class="bi bi-info-circle"></i>
+                <span>Court Information</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-folder me-2"></i>View Cases</h1>
+            <p class="text-muted">View your assigned cases and all court cases</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-folder-check me-2"></i>My Assigned Cases</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if my_cases %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Case #</th>
+                                            <th>Title</th>
+                                            <th>Type</th>
+                                            <th>Plaintiff</th>
+                                            <th>Defendant</th>
+                                            <th>Filing Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for case in my_cases %}
+                                        <tr>
+                                            <td><strong>{{ case.case_number }}</strong></td>
+                                            <td>{{ case.case_title }}</td>
+                                            <td><span class="badge bg-info">{{ case.case_type }}</span></td>
+                                            <td>{{ case.plaintiff or '-' }}</td>
+                                            <td>{{ case.defendant or '-' }}</td>
+                                            <td>{{ case.filing_date or '-' }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if case.status == 'active' else 'warning' if case.status == 'pending' else 'secondary' }}">
+                                                    {{ case.status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-folder-x"></i>
+                                <p>No cases assigned to you yet</p>
+                                <small class="text-muted">Cases will appear here once assigned by the court</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-folder me-2"></i>All Court Cases</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if all_cases %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Case #</th>
+                                            <th>Title</th>
+                                            <th>Type</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for case in all_cases %}
+                                        <tr>
+                                            <td>{{ case.case_number }}</td>
+                                            <td>{{ case.case_title }}</td>
+                                            <td><span class="badge bg-info">{{ case.case_type }}</span></td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if case.status == 'active' else 'warning' if case.status == 'pending' else 'secondary' }}">
+                                                    {{ case.status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-folder-x"></i>
+                                <p>No cases in the system yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

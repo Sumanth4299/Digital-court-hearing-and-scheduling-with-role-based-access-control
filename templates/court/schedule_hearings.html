@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Schedule Hearings - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-hammer sidebar-icon"></i>
+            <h5>Court Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('court_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('court_schedule_hearings') }}" class="sidebar-link active">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Hearings</span>
+            </a>
+            <a href="{{ url_for('court_manage_cases') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>Manage Cases</span>
+            </a>
+            <a href="{{ url_for('court_view_users') }}" class="sidebar-link">
+                <i class="bi bi-people"></i>
+                <span>View Users</span>
+            </a>
+            <a href="{{ url_for('court_share_info') }}" class="sidebar-link">
+                <i class="bi bi-envelope-paper"></i>
+                <span>Share Secure Info</span>
+            </a>
+            <a href="{{ url_for('court_view_schedules') }}" class="sidebar-link">
+                <i class="bi bi-calendar3"></i>
+                <span>View Schedules</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-calendar-plus me-2"></i>Schedule Hearings</h1>
+            <p class="text-muted">Create and manage court hearing schedules</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-plus-circle me-2"></i>New Hearing</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('court_schedule_hearings') }}">
+                            <div class="mb-3">
+                                <label for="case_id" class="form-label">Select Case</label>
+                                <select class="form-select" id="case_id" name="case_id" required>
+                                    <option value="">Choose a case...</option>
+                                    {% for case in cases %}
+                                    <option value="{{ case.id }}">{{ case.case_number }} - {{ case.case_title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="case_title" class="form-label">Hearing Title</label>
+                                <input type="text" class="form-control" id="case_title" name="case_title" required>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="hearing_date" class="form-label">Hearing Date</label>
+                                    <input type="date" class="form-control" id="hearing_date" name="hearing_date" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="hearing_time" class="form-label">Hearing Time</label>
+                                    <input type="time" class="form-control" id="hearing_time" name="hearing_time" required>
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="courtroom" class="form-label">Courtroom</label>
+                                    <input type="text" class="form-control" id="courtroom" name="courtroom" placeholder="e.g., Room 101">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="judge_name" class="form-label">Judge Name</label>
+                                    <input type="text" class="form-control" id="judge_name" name="judge_name">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hearing_type" class="form-label">Hearing Type</label>
+                                <select class="form-select" id="hearing_type" name="hearing_type">
+                                    <option value="preliminary">Preliminary Hearing</option>
+                                    <option value="trial">Trial</option>
+                                    <option value="motion">Motion Hearing</option>
+                                    <option value="sentencing">Sentencing</option>
+                                    <option value="arraignment">Arraignment</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-calendar-plus me-2"></i>Schedule Hearing
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-calendar-event me-2"></i>Scheduled Hearings</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if hearings %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Courtroom</th>
+                                            <th>Type</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for hearing in hearings %}
+                                        <tr>
+                                            <td>{{ hearing.case_title }}</td>
+                                            <td>{{ hearing.hearing_date }}</td>
+                                            <td>{{ hearing.hearing_time }}</td>
+                                            <td>{{ hearing.courtroom or '-' }}</td>
+                                            <td>{{ hearing.hearing_type }}</td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ hearing.status }}</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-calendar-x"></i>
+                                <p>No hearings scheduled yet</p>
+                                <small class="text-muted">Use the form to schedule your first hearing</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}View Schedules - Secure Court System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-hammer sidebar-icon"></i>
+            <h5>Court Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('court_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('court_schedule_hearings') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Hearings</span>
+            </a>
+            <a href="{{ url_for('court_manage_cases') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>Manage Cases</span>
+            </a>
+            <a href="{{ url_for('court_view_users') }}" class="sidebar-link">
+                <i class="bi bi-people"></i>
+                <span>View Users</span>
+            </a>
+            <a href="{{ url_for('court_share_info') }}" class="sidebar-link">
+                <i class="bi bi-envelope-paper"></i>
+                <span>Share Secure Info</span>
+            </a>
+            <a href="{{ url_for('court_view_schedules') }}" class="sidebar-link active">
+                <i class="bi bi-calendar3"></i>
+                <span>View Schedules</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-calendar3 me-2"></i>View All Schedules</h1>
+            <p class="text-muted">Overview of all hearings and appointments</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-calendar-event me-2"></i>Court Hearings</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if hearings %}
+                            <div class="schedule-list">
+                                {% for hearing in hearings %}
+                                <div class="schedule-card hearing">
+                                    <div class="schedule-date">
+                                        <span class="day">{{ hearing.hearing_date[8:10] if hearing.hearing_date else '--' }}</span>
+                                        <span class="month">{{ hearing.hearing_date[5:7] if hearing.hearing_date else '--' }}/{{ hearing.hearing_date[:4] if hearing.hearing_date else '--' }}</span>
+                                    </div>
+                                    <div class="schedule-info">
+                                        <h6>{{ hearing.case_title }}</h6>
+                                        <p class="text-muted mb-1">
+                                            <i class="bi bi-clock me-1"></i>{{ hearing.hearing_time }}
+                                            {% if hearing.courtroom %}
+                                            <span class="mx-2">|</span>
+                                            <i class="bi bi-door-open me-1"></i>{{ hearing.courtroom }}
+                                            {% endif %}
+                                        </p>
+                                        <span class="badge bg-primary">{{ hearing.hearing_type }}</span>
+                                        <span class="badge bg-{{ 'success' if hearing.status == 'completed' else 'info' }}">{{ hearing.status }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-calendar-x"></i>
+                                <p>No hearings scheduled</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="bi bi-calendar-check me-2"></i>Lawyer-Client Appointments</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if appointments %}
+                            <div class="schedule-list">
+                                {% for apt in appointments %}
+                                <div class="schedule-card appointment">
+                                    <div class="schedule-date">
+                                        <span class="day">{{ apt.appointment_date[8:10] if apt.appointment_date else apt.preferred_date[8:10] if apt.preferred_date else '--' }}</span>
+                                        <span class="month">{{ apt.appointment_date[5:7] if apt.appointment_date else apt.preferred_date[5:7] if apt.preferred_date else '--' }}</span>
+                                    </div>
+                                    <div class="schedule-info">
+                                        <h6>{{ apt.appointment_type or 'Consultation' }}</h6>
+                                        <p class="text-muted mb-1">
+                                            <i class="bi bi-clock me-1"></i>{{ apt.appointment_time or apt.preferred_time }}
+                                            {% if apt.location %}
+                                            <span class="mx-2">|</span>
+                                            <i class="bi bi-geo-alt me-1"></i>{{ apt.location }}
+                                            {% endif %}
+                                        </p>
+                                        <small class="text-muted">
+                                            Lawyer: {{ apt.lawyer_name or 'N/A' }} | Client: {{ apt.client_name or 'N/A' }}
+                                        </small>
+                                        <span class="badge bg-{{ 'success' if apt.status == 'scheduled' else 'warning' }} ms-2">{{ apt.status }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-calendar-x"></i>
+                                <p>No appointments scheduled</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
