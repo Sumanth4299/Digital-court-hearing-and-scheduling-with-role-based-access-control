@@ -29,6 +29,10 @@
                 <i class="bi bi-calendar-plus"></i>
                 <span>Schedule Appointments</span>
             </a>
+             <a href="{{ url_for('client_messages') }}" class="sidebar-link">
+                <i class="bi bi-envelope-open"></i>
+                <span>Secure Messages</span>
+            </a>
             <a href="{{ url_for('client_hearing_dates') }}" class="sidebar-link">
                 <i class="bi bi-calendar-event"></i>
                 <span>Hearing Dates</span>
@@ -122,8 +126,8 @@
                                                 <i class="bi bi-file-earmark-lock text-success me-2"></i>
                                                 {{ file.original_filename }}
                                             </td>
-                                            <td>{{ (file.file_size / 1024) | round(2) }} KB</td>
-                                            <td>{{ file.uploaded_at[:10] }}</td>
+                                           <td>{{ ((file.file_size | int) / 1024) | round(2) }} KB</td>
+                                            <td>{{ file.uploaded_at.strftime('%Y-%m-%d') }}</td>
                                             <td>
                                                 <span class="badge bg-success">
                                                     <i class="bi bi-lock-fill"></i> Encrypted

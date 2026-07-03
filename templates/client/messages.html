@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Secure Inbox - Client Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar client-sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-person sidebar-icon"></i>
+            <h5>Client Portal</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('client_dashboard') }}" class="sidebar-link">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('client_case_status') }}" class="sidebar-link">
+                <i class="bi bi-folder"></i>
+                <span>Case Status</span>
+            </a>
+            <a href="{{ url_for('client_upload_documents') }}" class="sidebar-link">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Documents</span>
+            </a>
+            <a href="{{ url_for('client_download_files') }}" class="sidebar-link">
+                <i class="bi bi-cloud-download"></i>
+                <span>Download Files</span>
+            </a>
+            <a href="{{ url_for('client_schedule_appointments') }}" class="sidebar-link">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule Appointments</span>
+            </a>
+             <a href="{{ url_for('client_messages') }}" class="sidebar-link active">
+                <i class="bi bi-envelope-open"></i>
+                <span>Secure Messages</span>
+            </a>
+            <a href="{{ url_for('client_hearing_dates') }}" class="sidebar-link ">
+                <i class="bi bi-calendar-event"></i>
+                <span>Hearing Dates</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-inbox me-2"></i>Secure Inbox</h1>
+            <p class="text-muted">View confidential notifications and encrypted legal communications</p>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header-custom">
+                <h5><i class="bi bi-envelope-paper me-2"></i>Received Notifications</h5>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                    <div class="message-list">
+                        {% for msg in messages %}
+                        <div class="message-card p-3 mb-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">{{ msg.subject }}</h5>
+                                <div>
+                                    {% if msg.is_encrypted %}
+                                        <span class="badge bg-success me-2"><i class="bi bi-lock-fill"></i> Encrypted</span>
+                                    {% endif %}
+                                    <span class="text-muted small">{{ msg.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                </div>
+                            </div>
+                            <div class="message-meta mb-2">
+                                <small class="text-muted">From: {{ msg.sender_name }} ({{ msg.sender_role | title }})</small>
+                            </div>
+                            <div class="message-body bg-light p-3 rounded text-break">
+                                {% if msg.is_encrypted %}
+                                    <p class="text-muted small mb-2"><em>This message is encrypted. Click decrypt to read:</em></p>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <button class="btn btn-sm btn-outline-primary decrypt-btn" data-message-id="{{ msg.id }}">
+                                            <i class="bi bi-unlock me-1"></i> Decrypt Message
+                                        </button>
+                                        <span class="decrypted-text-target fw-bold text-success d-none"></span>
+                                    </div>
+                                {% else %}
+                                    {{ msg.message }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-envelope-open fs-1"></i>
+                        <p class="mt-2">Your inbox is completely clear.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+document.querySelectorAll('.decrypt-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const messageId = this.getAttribute('data-message-id');
+        const textTarget = this.nextElementSibling;
+        
+        fetch(`/decrypt-message/${messageId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.decrypted) {
+                    textTarget.textContent = data.decrypted;
+                    textTarget.classList.remove('d-none');
+                    this.remove();
+                } else {
+                    alert(data.error || 'Decryption structural exception occurred.');
+                }
+            });
+    });
+});
+</script>
+{% endblock %}

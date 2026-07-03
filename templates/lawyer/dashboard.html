@@ -133,7 +133,7 @@
                                     </div>
                                     <div class="file-info">
                                         <h6>{{ file.original_filename }}</h6>
-                                        <small class="text-muted">{{ file.uploaded_at[:10] }}</small>
+                                        <small class="text-muted">{{ file.uploaded_at.strftime('%Y-%m-%d') }}</small>
                                     </div>
                                     <span class="badge bg-success"><i class="bi bi-lock-fill"></i> Encrypted</span>
                                 </div>

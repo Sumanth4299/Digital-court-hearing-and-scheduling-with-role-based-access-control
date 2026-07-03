@@ -2,72 +2,50 @@ import os
 import logging
 from flask import Flask
 from flask_login import LoginManager
-from flask_sqlalchemy import SQLAlchemy
-
+from models import db, User, CaseModel, HearingModel, FileModel, MessageModel, AppointmentModel
+from dotenv import load_dotenv
 logging.basicConfig(level=logging.DEBUG)
 
-app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET","secret")
+load_dotenv()
 
-# Database configuration: set DATABASE_URL env var to a MySQL URI like
-# mysql+pymysql://user:password@host:3306/dbname
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///court.db')
+app = Flask(__name__)
+app.secret_key = os.environ.get("SESSION_SECRET", "secret")
+
+# MySQL Configuration String linked to user 'sumanth'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://root:fallback@127.0.0.1/court_system')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
 
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
+db.init_app(app)
 
+# File attachment structural processing parameters
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-
-class User:
-    """Lightweight wrapper for flask-login using the ORM model instance."""
-    def __init__(self, user_model):
-        self._m = user_model
-        self.id = user_model.id
-        self.username = user_model.username
-        self.email = user_model.email
-        self.password_hash = user_model.password_hash
-        self.role = user_model.role
-        self.full_name = getattr(user_model, 'full_name', '') or ''
-        self.phone = getattr(user_model, 'phone', '') or ''
-        self.address = getattr(user_model, 'address', '') or ''
-
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        return str(self.id)
-
+# Setup session login management parameters
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    from models import User as UserModel
-    user_model = UserModel.query.filter_by(id=user_id).first()
-    if user_model:
-        return User(user_model)
-    return None
+    return User.query.get(int(user_id))
+User = User
+users_table = User
+cases_table = CaseModel
+hearings_table = HearingModel
+files_table = FileModel
+messages_table = MessageModel
+appointments_table = AppointmentModel
 
-
-from models import *  # ensure models are registered
-from routes import *
-
-# Create DB tables if they don't exist (development convenience)
+# Compile and execute the SQL schema inside your workbench instance
 with app.app_context():
     db.create_all()
 
+# Import route rules after establishing the table variables
+from routes import *
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
- 
